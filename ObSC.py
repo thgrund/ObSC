@@ -51,7 +51,7 @@ def getCurrentScenes():
     scenes = ws.call(requests.GetSceneList())
     for s in scenes.getScenes():
         name = s['name']
-        print(ws.call(requests.GetSourcesList()),"\n")  # Get The list of available sources in each scene in OBS
+#        print(ws.call(requests.GetSourcesList()),"\n")  # Get The list of available sources in each scene in OBS
         ScenesNames.append(name)  # Add every scene to a list of scenes
     printScenes(ScenesNames)
     return scenes
@@ -67,9 +67,26 @@ def printScenes(ScenesNames):
     print("=====================================\n")
     print("\n")
 
+def printGeneralAddressInfo():
+    print("General Addresses:")
+    print("=====================================\n")
+    print("Streaming:")
+    print("Start: /streaming/start")
+    print("Stop: /streaming/stop")
+    print("Toggle: /streaming/toggle")
+    print("\nRecording:")
+    print("Start: /recording/start")
+    print("Stop: /recording/stop")
+    print("Toggle: /recording/toggle")
+    print("=====================================\n")
+    print("\n")
+
 
 if __name__ == "__main__":
     try:
+        print("\n")
+        print("\n")
+        printGeneralAddressInfo()
         scenes = getCurrentScenes()
 #        sources = getCurrentSources()
         ### OSC Settings
