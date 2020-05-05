@@ -18,41 +18,55 @@ ws.connect()
 ScenesNames = []
 SceneSources = []
 
-def sourceSwitch(source_name,scene,switch):
-    ws.call(requests.SetSceneItemProperties(source_name,scene,visible=switch)) 
+def removePrefix(text, prefix):
+    return text[text.startswith(prefix) and len(prefix):]
 
-def scene_switch(unused_addr, args, filter):  
-       
-    if filter > 60 : # change to scene 2 
-        ws.call(requests.SetCurrentScene(ScenesNames[1]))          
-                                                                    #sourceSwitch("screen1","Scene1",True)   
-                                                                    #sourceSwitch("screen2","Scene1",False)
-    elif filter <= 59 :
-        ws.call(requests.SetCurrentScene(ScenesNames[0]))           # Control sources by using sourceSwitch("source_Name","Scene_name", bool)
-                                                                    #sourceSwitch("screen1","Scene1",False)
-    print("\n [{0}] +" " + {1}".format(args[0], filter))    
+def sourceSwitch(address):  # This function is untested
+    sourceName = removePrefix(address, '/source/')
+    ws.call(requests.SetSceneItemProperties(sourceName,scene,visible=switch))
+
+def sceneSwitch(address):  
+    sceneName = removePrefix(address, '/scene/')
+    ws.call(requests.SetCurrentScene(sceneName))
+
+def getCurrentScenes():
+    scenes = ws.call(requests.GetSceneList())
+    for s in scenes.getScenes():
+        name = s['name']
+        print(ws.call(requests.GetSourcesList()),"\n")       # Get The list of available sources in each scene in OBS
+        ScenesNames.append(name)                        # Add every scene to a list of scenes
+    printScenes(ScenesNames)
+    return scenes
+
+def printScenes(ScenesNames):
+    print("Current scenes and their OSC addresses:")
+    print("=====================================\n")
+    for scene in ScenesNames:
+        spaceWarning = ""
+        if ' ' in scene:
+            spaceWarning = "    **** Warning!  Spaces are not valid in OSC addresses.  Please rename Scene in OBS. ****"
+        print(scene + ": /scene/" + scene + spaceWarning + "")
+    print("=====================================\n")
+    print("\n")
 
 
 if __name__ == "__main__":
     try:
-        scenes = ws.call(requests.GetSceneList())
-
-        for s in scenes.getScenes():
-            name = s['name']
-            print(ws.call(requests.GetSourcesList()),"\n")       # Get The list of available sources in each scene in OBS
-            ScenesNames.append(name)                        # Add every scene to a list of scenes
-
-        print("\n CURRENT SCENES IN OBS" ,ScenesNames)
-       
+        scenes = getCurrentScenes()
+#        sources = getCurrentSources()
         ### OSC SETTINGS
         parser = argparse.ArgumentParser()
         parser.add_argument("--ip",default="127.0.0.1", help="The ip to listen on")
         parser.add_argument("--port",type=int, default=5005, help="The port to listen on")
 
         args = parser.parse_args()                           # parser for --ip --port arguments
+
         dispatcher = dispatcher.Dispatcher()
 
-        dispatcher.map("/Scene", scene_switch, "Scene")      # OSC LISTENER
+        ### OSC Address Mappings
+        dispatcher.map("/scene/*", sceneSwitch)
+        dispatcher.map("/source/*", sourceSwitch)
+
         server = osc_server.ThreadingOSCUDPServer((args.ip, args.port), dispatcher)  
         print("Serving on {}".format(server.server_address))
         
