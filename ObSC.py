@@ -29,12 +29,30 @@ def sceneSwitch(address):
     sceneName = removePrefix(address, '/scene/')
     ws.call(requests.SetCurrentScene(sceneName))
 
+def recordingControl(address):  
+    controlType = removePrefix(address, '/recording/')
+    if controlType == 'start':
+        ws.call(requests.StartRecording())
+    elif controlType == 'stop':
+        ws.call(requests.StopRecording())
+    elif controlType == 'toggle':
+        ws.call(requests.StartStopRecording())
+
+def streamingControl(address):  
+    controlType = removePrefix(address, '/streaming/')
+    if controlType == 'start':
+        ws.call(requests.StartStreaming())
+    elif controlType == 'stop':
+        ws.call(requests.StopStreaming())
+    elif controlType == 'toggle':
+        ws.call(requests.StartStopStreaming())
+
 def getCurrentScenes():
     scenes = ws.call(requests.GetSceneList())
     for s in scenes.getScenes():
         name = s['name']
-        print(ws.call(requests.GetSourcesList()),"\n")       # Get The list of available sources in each scene in OBS
-        ScenesNames.append(name)                        # Add every scene to a list of scenes
+        print(ws.call(requests.GetSourcesList()),"\n")  # Get The list of available sources in each scene in OBS
+        ScenesNames.append(name)  # Add every scene to a list of scenes
     printScenes(ScenesNames)
     return scenes
 
@@ -54,18 +72,26 @@ if __name__ == "__main__":
     try:
         scenes = getCurrentScenes()
 #        sources = getCurrentSources()
-        ### OSC SETTINGS
+        ### OSC Settings
         parser = argparse.ArgumentParser()
         parser.add_argument("--ip",default="127.0.0.1", help="The ip to listen on")
         parser.add_argument("--port",type=int, default=5005, help="The port to listen on")
 
-        args = parser.parse_args()                           # parser for --ip --port arguments
+        args = parser.parse_args()  # parser for --ip --port arguments
 
         dispatcher = dispatcher.Dispatcher()
 
         ### OSC Address Mappings
         dispatcher.map("/scene/*", sceneSwitch)
         dispatcher.map("/source/*", sourceSwitch)
+        
+        dispatcher.map("/recording/start", recordingControl)
+        dispatcher.map("/recording/stop", recordingControl)
+        dispatcher.map("/recording/toggle", recordingControl)
+
+        dispatcher.map("/streaming/start", streamingControl)
+        dispatcher.map("/streaming/stop", streamingControl)
+        dispatcher.map("/streaming/toggle", streamingControl)
 
         server = osc_server.ThreadingOSCUDPServer((args.ip, args.port), dispatcher)  
         print("Serving on {}".format(server.server_address))
