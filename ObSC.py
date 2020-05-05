@@ -28,7 +28,7 @@ def scene_switch(unused_addr, args, filter):
                                                                     #sourceSwitch("screen1","Scene1",True)   
                                                                     #sourceSwitch("screen2","Scene1",False)
     elif filter <= 59 :
-        ws.call(requests.SetCurrentScene(ScenesNames[0]))           # COntrol sources by using sourceSwitch("source_Name","Scene_name", bool)
+        ws.call(requests.SetCurrentScene(ScenesNames[0]))           # Control sources by using sourceSwitch("source_Name","Scene_name", bool)
                                                                     #sourceSwitch("screen1","Scene1",False)
     print("\n [{0}] +" " + {1}".format(args[0], filter))    
 
