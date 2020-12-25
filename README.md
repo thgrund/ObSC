@@ -10,7 +10,7 @@ This project was forked from https://github.com/CarloCattano/ObSC as the way I w
 ### * the script connects python to obs websocket on port 4444 in localhost using default credentials ( you might want to change that if you stream :-) 
 
  * you can get all the needed stuff with pip install -r requirements.txt
- * An osc listener runs on port 5005 and listens for /Scene message  
+ * An osc listener runs on port 4444 and listens for /Scene message  
 
 Requirements:
 Developed on macOS 10.15 using Python3
